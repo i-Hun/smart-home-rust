@@ -1,83 +1,92 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 // Дом имеет название и содержит несколько помещений.
-struct House {
+struct SmartHouse {
     name: String,
-    rooms: Vec<Room>
+    rooms: HashMap<String, Room>
 }
 
-//Помещение имеет уникальное название и содержит названия нескольких устройств.
 struct Room {
     name: String,
-    devices: HashMap<String, Box<dyn Device>> // Устройство имеет уникальное в рамках помещения имя. (т.к. словарь)
+    devices: HashSet<String>
 }
 
-trait Device {
-    fn state(&self) -> str;
-}
-
-// Библиотека позволяет запросить список помещений в доме.
-
-impl House {
+impl SmartHouse {
     fn new() -> Self {
-        House {
-            name: "Default house".to_string(),
-            rooms: Default::default()
-        }
+        todo!("реализовать инициализацию дома")
     }
-    fn rooms(&self) -> &Vec<Room> {
-        &self.rooms
+
+    fn get_rooms(&self) -> [&str; 2] {
+        // Размер возвращаемого массива можно выбрать самостоятельно
+        todo!("список комнат")
     }
-    fn devices(&self, room: Room) -> &HashMap<String, Box<dyn Device>> {
-        todo!()
+
+    fn devices(&self, room: &str) -> [&str; 3] {
+        // Размер возвращаемого массива можно выбрать самостоятельно
+        todo!("список устройств в комнате `room`")
     }
-    fn create_report() -> String {
+
+    fn create_report(
+        &self, 
+        /* todo: принять обобщённый тип предоставляющий информацию об устройствах */
+        info: & impl DeviceInfoProvider
+    ) -> String {
+        todo!("перебор комнат и устройств в них для составления отчёта")
+    }
+}
+
+trait DeviceInfoProvider {
+    // todo: метод, возвращающий состояние устройства по имени комнаты и имени устройства
+    fn get_device_info(&self, room_name: String, device_name: String) -> String {
         todo!()
     }
 }
 
-// Библиотека позволяет получать список устройств в помещении.
-impl Room {
-    fn devices(&self) -> &HashMap<String, Box<dyn Device>> {
-        &self.devices
-    }
+// ***** Пример использования библиотеки умный дом:
+
+// Пользовательские устройства:
+struct SmartSocket {}
+struct SmartThermometer {}
+
+// Пользовательские поставщики информации об устройствах.
+// Могут как хранить устройства, так и заимствывать.
+struct OwningDeviceInfoProvider {
+    socket: SmartSocket,
+}
+struct BorrowingDeviceInfoProvider<'a, 'b> {
+    socket: &'a SmartSocket,
+    thermo: &'b SmartThermometer,
 }
 
-struct SmartSocket {
-    ip: u32,
-    port: u16,
-    description: String,
-    is_active: bool,
-    power: f32,
-}
 
-struct SmartThermometer {
-    ip: u32,
-    port: u16,
-    temperature: f32,
-}
-
-impl SmartSocket {
-    fn _get_description(&self) -> String {
-        todo!()
-    }
-    fn _switch_power(&self) {
-        todo!()
-    }
-    fn _get_power(&self) -> f32 {
-        self.power
-    }
-}
-
-impl SmartThermometer {
-    fn _get_current_temperature(&self) -> f32 {
-        todo!()
-    }
-}
+// todo: реализация трейта `DeviceInfoProvider` для поставщиков информации
 
 fn main() {
     // Инициализация устройств
     let socket1 = SmartSocket {};
     let socket2 = SmartSocket {};
     let thermo = SmartThermometer {};
+
+    // Инициализация дома
+    let house = SmartHouse::new();
+
+
+    // Строим отчёт с использованием `OwningDeviceInfoProvider`.
+    let info_provider_1 = OwningDeviceInfoProvider {
+        socket: socket1,
+    };
+    // todo: после добавления обобщённого аргумента в метод, расскоментировать передачу параметра
+    let report1 = house.create_report(/* &info_provider_1 */);
+
+    // Строим отчёт с использованием `BorrowingDeviceInfoProvider`.
+    let info_provider_2 = BorrowingDeviceInfoProvider {
+        socket: &socket2,
+        thermo: &thermo,
+    };
+    // todo: после добавления обобщённого аргумента в метод, расскоментировать передачу параметра
+    let report2 = house.create_report(/* &info_provider_2 */);
+
+    // Выводим отчёты на экран:
+    println!("Report #1: {report1}");
+    println!("Report #2: {report2}");
 }
